@@ -1,0 +1,100 @@
+---
+title: "Lab 2"
+author: "Emma Smykalski"
+date: "2/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r summary, echo=FALSE}
+choco <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/data/choco.csv")
+```
+#### 1)
+The ratings are distributed on a range from 1 to 4 with the rating with the highest amount of chocolates (503) being 3.5.The histogram shows us that the distribution of ratings is not normal and very few ratings below 2.5. The summary of ratings shows that the mean is 3.184 and the median is 3.25 which you can see in the boxplot. There are 4 lower outliers seen on the boxplot.  
+
+**Summary:**  
+```{r}
+summary(choco$Rating)
+```
+
+**Histogram:**    
+```{r}
+hist(choco$Rating)
+```
+
+**Boxplot:**
+```{r}
+boxplot(choco$Rating)
+```
+
+
+#### 2)
+As you can see in the bar chart below, there is a big difference in the number of ratings between all the countries. There is a big difference between the country with the largest number of ratings and the country with the smallest number of ratings.I sorted the locations into least to most ratings per country and did the log function so you can see the difference in numbers clearly.  
+
+```{r}
+barplot(sort(log(table(choco$Location))))
+```
+
+#### 3)  
+The ratings don't depend too much on the cocao percentage of a chocolate bar. I made a barplot in which the levels are the different percentages of cocao and plotted it against the ratings and most of the medians were around the same area. The medians didn't go up or down with the percentage. I also did a correlation between the two where I saw that there was only a -.15 correlation meaning they don't have a strong relationship.  
+```{r}
+perc <- factor(c(choco$Cocoa_Percent))
+lev <- levels(perc)
+typ1 <- factor(choco$Cocoa_Percent, levels = lev)
+boxplot(choco$Rating ~ typ1)
+```
+
+**Correlation:**
+```{r}
+cor(choco$Cocoa_Percent, choco$Rating)
+```
+
+#### 4)  
+In order to find how different bean origins compare in terms of flavor I did a few things. First, I reordered bean origin in terms of the mean ratings so I could see how they rank on the different scales of flavor. From this numerical summary I found that Tobago produces beans that make chocolate of a highly recommended flavor, on average. Some other origins that rank further up in flavor are Sao Tome & Principe and Solomon Islands. Some chocolates that were ranked disapointing had beans that were originated from Principe, Puerto Rico, and St. Vincent-Grenadines.The second thing I did was make a boxplot of this information and found that the medians were actually pretty similar throughout the different origins. (sorry I didn't know how to get rid of all of the origins listed in the beginning before the numerical summary) 
+**Numerical Summary**  
+```{r}
+re <-reorder(choco$Bean_Origin, choco$Rating, FUN=mean)
+re
+```
+**Boxplot**
+```{r}
+boxplot(choco$Rating ~ re)
+```
+
+
+#### 5)  
+For the first part of my extra analysis I decided to find the chocolates that were rated as having an unpleasant flavor by sorting out the ones with a ranking between 1 and 1.9 and compare them to chocolates that had an outstanding flavor rating, the ones with a ranking between 4 and 5. I then made a factor out of each of those two groups to find characteristics that showed up the most in them as shown below:  
+```{r}
+unpleasant <- (choco$Rating >= 1 & choco$Rating <= 1.9)
+unpleasantb <- choco[unpleasant, c(3,5,7,10,13)]
+summary(factor(unpleasantb$Characteristics2), sort = TRUE, na.rm = TRUE)
+```
+
+```{r}
+outstanding <- (choco$Rating >= 4 & choco$Rating <= 5)
+outstandingb <- choco[outstanding, c(3,5,7,10,13)]
+summary(factor(outstandingb$Characteristics2), sort = TRUE, na.rm = TRUE)
+```
+
+The characteristics that showed up in these two categories make sense especially with bitter and strong chemical showing up in unpleasant. I was surprised that spicy had a lot of occurrences in the outstanding chocolates.  
+
+The next analysis I did was create a sub data frame with the highest ranking chocolate, I chose ranking of 3.5 and above. I wanted to find the location and bean origin combination that made the best ranked chocolate. I used a table to find the location with the most occurrences in this data frame and I found the U.S.A. had the most occurrences. From there I filtered out only the rows with U.S.A to look at a table of the bean origins to see which origin had the most occurrences. I concluded that the best chocolates have a company located in the U.S.A. and are made from beans that originate in the Dominican Republic. I also made a barplot representing the occurrences of bean origins of the chocolates made from U.S.A. companies.  
+**Here is the table representing the number of best chocolates in each location**
+```{r}
+highest_ranked <- choco$Rating >= 3.5
+best <- choco[highest_ranked, c(3,5,7,13)]
+table(best$Location)
+```
+
+**Here is the table representing the number of best chocolates with different bean origins from companies in the U.S.A.**
+```{r}
+loc <- best[best$Location == 'U.S.A.', ]
+table(loc$Bean_Origin)
+```
+
+**Barplot of occurrences of bean origins of the chocolates made from U.S.A. companies**
+```{r}
+barplot(table(loc$Bean_Origin))
+```
